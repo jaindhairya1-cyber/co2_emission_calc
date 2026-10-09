@@ -1,0 +1,23 @@
+{
+  "name": "TerraAI - Carbon Intelligence for MSMEs",
+  "short_name": "TerraAI",
+  "description": "Automated GHG emissions calculator and decarbonization intelligence platform for Indian MSMEs.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0E382B",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
