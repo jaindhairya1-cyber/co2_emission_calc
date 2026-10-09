@@ -1,0 +1,68 @@
+{
+  "1_transport_bill.jpg": {
+    "category": "Transport",
+    "vendor_name": "Shree Balaji Roadlines",
+    "buyer_name": "Sunrise Garments Pvt. Ltd.",
+    "buyer_gstin": "23AABCS4821K1Z5",
+    "bill_number": "SBR/2026/0847",
+    "bill_date": "2026-10-05",
+    "vehicle_type": "Truck 10-Tonne",
+    "vehicle_number": "MP09HG4417",
+    "fuel_type": "Diesel",
+    "total_distance_km": 1365.0,
+    "total_weight_kg": 17500.0,
+    "total_amount_inr": 25184.26
+  },
+  "2_fuel_bill.jpg": {
+    "category": "Fuel",
+    "vendor_name": "Narmada Fuel Station",
+    "buyer_name": "Sunrise Garments Pvt. Ltd.",
+    "buyer_gstin": "23AABCS4821K1Z5",
+    "bill_number": "NFS-102934",
+    "bill_date": "2026-10-03",
+    "diesel_litres": 550.0,
+    "petrol_litres": 45.0,
+    "lpg_cylinders": 2,
+    "total_amount_inr": 57330.0
+  },
+  "3_raw_material_bill.jpg": {
+    "category": "Raw material purchase",
+    "vendor_name": "Malwa Textiles & Yarn Traders",
+    "buyer_name": "Sunrise Garments Pvt. Ltd.",
+    "buyer_gstin": "23AABCS4821K1Z5",
+    "bill_number": "MTY/26-27/1562",
+    "bill_date": "2026-09-28",
+    "cotton_kg": 2500.0,
+    "polyester_kg": 800.0,
+    "total_material_weight_kg": 3300.0,
+    "total_amount_inr": 1046046.0
+  },
+  "4_waste_bill.jpg": {
+    "category": "Waste",
+    "vendor_name": "Green Cycle Waste Solutions",
+    "buyer_name": "Sunrise Garments Pvt. Ltd.",
+    "buyer_gstin": "23AABCS4821K1Z5",
+    "bill_number": "GCW/10/2297",
+    "bill_date": "2026-09-30",
+    "billing_period": "Sep 2026",
+    "total_waste_kg": 2420.0,
+    "waste_types_count": 5,
+    "total_amount_inr": 13174.70
+  },
+  "5_electricity_bill.jpg": {
+    "category": "Electricity",
+    "vendor_name": "Malwa Power Distribution Co. Ltd.",
+    "buyer_name": "Sunrise Garments Pvt. Ltd.",
+    "buyer_gstin": "23AABCS4821K1Z5",
+    "bill_number": "N-4821-0098-17",
+    "bill_date": "2026-10-02",
+    "billing_period": "Sep 2026",
+    "consumer_number": "N-4821-0098-17",
+    "units_consumed_kwh": 12500.0,
+    "previous_reading": 184320.0,
+    "current_reading": 196820.0,
+    "tariff_category": "LT-5 Industrial",
+    "sanctioned_load": "75 kW",
+    "total_amount_inr": 127260.0
+  }
+}

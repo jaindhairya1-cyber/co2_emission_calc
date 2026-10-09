@@ -1,0 +1,6 @@
+# TerraAI Robots.txt for Search Engines
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://terracarbon.in/sitemap.xml
