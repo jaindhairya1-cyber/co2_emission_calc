@@ -1,0 +1,138 @@
+{
+  "electricity": {
+    "india_grid": {
+      "name": "CEA India Central Electricity Authority Baseline Database",
+      "factor": 0.7100,
+      "unit": "kg CO2e / kWh",
+      "scope": "Scope 2",
+      "version": "FY 2024-25 v21.0"
+    },
+    "renewable": {
+      "name": "Solar Rooftop / Green Energy Open Access",
+      "factor": 0.0000,
+      "unit": "kg CO2e / kWh",
+      "scope": "Scope 2",
+      "version": "MNRE 2025"
+    }
+  },
+  "fuels": {
+    "Diesel": {
+      "name": "Stationary Diesel Generator / Boiler",
+      "factor": 2.6800,
+      "unit": "kg CO2e / Litre",
+      "scope": "Scope 1",
+      "standard": "IPCC / DEFRA"
+    },
+    "Petrol": {
+      "name": "Motor Gasoline",
+      "factor": 2.3100,
+      "unit": "kg CO2e / Litre",
+      "scope": "Scope 1",
+      "standard": "DEFRA"
+    },
+    "LPG": {
+      "name": "Liquefied Petroleum Gas",
+      "factor": 1.5100,
+      "unit": "kg CO2e / kg",
+      "scope": "Scope 1",
+      "standard": "IPCC"
+    },
+    "Natural Gas": {
+      "name": "Piped Natural Gas (PNG)",
+      "factor": 2.0300,
+      "unit": "kg CO2e / m3",
+      "scope": "Scope 1",
+      "standard": "DEFRA"
+    },
+    "Coal": {
+      "name": "Indian Bituminous Steam Coal",
+      "factor": 2.4200,
+      "unit": "kg CO2e / kg",
+      "scope": "Scope 1",
+      "standard": "CEA / IPCC"
+    }
+  },
+  "transport": {
+    "Light Commercial Vehicle": {
+      "name": "LCV Goods Transit",
+      "factor": 0.2200,
+      "unit": "kg CO2e / vehicle-km",
+      "scope": "Scope 3",
+      "standard": "DEFRA Freight MSME"
+    },
+    "Heavy Commercial Vehicle": {
+      "name": "HCV / Heavy Truck (>14T)",
+      "factor": 0.8500,
+      "unit": "kg CO2e / vehicle-km",
+      "scope": "Scope 3",
+      "standard": "DEFRA Freight"
+    },
+    "Three Wheeler Goods": {
+      "name": "Auto Rickshaw Cargo / 3W Cargo",
+      "factor": 0.1100,
+      "unit": "kg CO2e / vehicle-km",
+      "scope": "Scope 3",
+      "standard": "India MSME"
+    }
+  },
+  "materials": {
+    "Steel": {
+      "name": "Virgin / Hot Rolled Mild Steel",
+      "factor": 1.8500,
+      "unit": "kg CO2e / kg",
+      "scope": "Scope 3",
+      "standard": "WorldSteel / ICE"
+    },
+    "Cotton Fabric": {
+      "name": "Woven Cotton Greige Fabric",
+      "factor": 8.3000,
+      "unit": "kg CO2e / kg",
+      "scope": "Scope 3",
+      "standard": "Higg MSI Textile"
+    },
+    "Polyester Yarn": {
+      "name": "Virgin PET Synthetic Yarn",
+      "factor": 5.4000,
+      "unit": "kg CO2e / kg",
+      "scope": "Scope 3",
+      "standard": "Higg MSI"
+    },
+    "Aluminum": {
+      "name": "Primary Ingot Aluminum",
+      "factor": 8.2400,
+      "unit": "kg CO2e / kg",
+      "scope": "Scope 3",
+      "standard": "IAI"
+    },
+    "Cardboard": {
+      "name": "Corrugated Packaging Box",
+      "factor": 0.9400,
+      "unit": "kg CO2e / kg",
+      "scope": "Scope 3",
+      "standard": "DEFRA"
+    }
+  },
+  "waste": {
+    "General waste": {
+      "name": "Landfilled Municipal Solid Waste",
+      "factor": 0.4500,
+      "unit": "kg CO2e / kg",
+      "scope": "Scope 3",
+      "standard": "IPCC Waste"
+    },
+    "Hazardous chemical waste": {
+      "name": "Incinerated Chemical / Sludge Waste",
+      "factor": 1.9500,
+      "unit": "kg CO2e / kg",
+      "scope": "Scope 3",
+      "standard": "CPCB"
+    },
+    "Recycled metal/plastic": {
+      "name": "Segregated Diverted Recyclables",
+      "factor": 0.0500,
+      "unit": "kg CO2e / kg",
+      "scope": "Scope 3",
+      "standard": "DEFRA"
+    }
+  }
+}

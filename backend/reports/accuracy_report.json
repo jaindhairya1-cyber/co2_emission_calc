@@ -1,0 +1,75 @@
+{
+  "overall_accuracy_pct": 33.33333333333333,
+  "results": [
+    {
+      "filename": "1_transport_bill.jpg",
+      "detected_category": "Electricity",
+      "category_match": false,
+      "activity_match": false,
+      "amount_match": false,
+      "score": 0.0,
+      "extracted_values": {
+        "amount": null,
+        "buyer": null,
+        "gstin": null,
+        "emissions_tco2e": 8.875
+      }
+    },
+    {
+      "filename": "2_fuel_bill.jpg",
+      "detected_category": "Fuel",
+      "category_match": true,
+      "activity_match": false,
+      "amount_match": false,
+      "score": 33.33333333333333,
+      "extracted_values": {
+        "amount": null,
+        "buyer": null,
+        "gstin": null,
+        "emissions_tco2e": 0.0
+      }
+    },
+    {
+      "filename": "3_raw_material_bill.jpg",
+      "detected_category": "Electricity",
+      "category_match": false,
+      "activity_match": false,
+      "amount_match": false,
+      "score": 0.0,
+      "extracted_values": {
+        "amount": null,
+        "buyer": null,
+        "gstin": null,
+        "emissions_tco2e": 8.875
+      }
+    },
+    {
+      "filename": "4_waste_bill.jpg",
+      "detected_category": "Waste",
+      "category_match": true,
+      "activity_match": true,
+      "amount_match": false,
+      "score": 66.66666666666666,
+      "extracted_values": {
+        "amount": null,
+        "buyer": null,
+        "gstin": null,
+        "emissions_tco2e": 1.089
+      }
+    },
+    {
+      "filename": "5_electricity_bill.jpg",
+      "detected_category": "Electricity",
+      "category_match": true,
+      "activity_match": true,
+      "amount_match": false,
+      "score": 66.66666666666666,
+      "extracted_values": {
+        "amount": null,
+        "buyer": null,
+        "gstin": null,
+        "emissions_tco2e": 8.875
+      }
+    }
+  ]
+}

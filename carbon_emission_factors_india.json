@@ -1,0 +1,755 @@
+{
+  "metadata": {
+    "dataset_name": "Carbon Emission Factors Knowledge Base - India",
+    "version": "1.0.0",
+    "created_on": "2026-10-09",
+    "purpose": "Versioned JSON reference dataset for a carbon-emissions calculator. Load into application memory/cache; no model training is required.",
+    "geographic_focus": "India where India-specific factors are available",
+    "calculation_principle": "The backend performs deterministic calculations. Groq may interpret questions and explain results, but must not invent factors or calculate official results from memory.",
+    "important_terms": {
+      "CO2": "Carbon dioxide only.",
+      "CO2e": "Carbon dioxide equivalent, including other greenhouse gases converted using a stated global-warming-potential basis.",
+      "activity_data": "Measured quantity such as kWh electricity, litres of fuel, or kg of material/waste.",
+      "emission_factor": "Emissions per unit of activity, with a defined gas, boundary, geography, year, and source."
+    },
+    "factor_status_definitions": {
+      "verified_historical": "The stated value and definition are supported by the cited source for the specified historical period.",
+      "source_supported_boundary_review": "A source supports the number, but its scope/boundary must be checked before use for the application's purpose.",
+      "user_provided_unverified": "Supplied by the project team; source and/or boundary not independently verified.",
+      "not_for_production": "Included for traceability only. Do not use as a default calculation factor until verified.",
+      "scenario_not_inventory_factor": "A future scenario value, not an observed factor for historical reporting."
+    },
+    "default_policy": {
+      "only_statuses_allowed_for_default_calculation": [
+        "verified_historical"
+      ],
+      "do_not_mix_CO2_and_CO2e": true,
+      "do_not_mix_direct_combustion_and_lifecycle_boundaries": true,
+      "do_not_assume_one_waste_factor_applies_to_all_waste_types": true,
+      "do_not_replace_missing_factors_with_AI_guesses": true,
+      "keep_full_precision_until_display": true,
+      "always_return_factor_id_source_year_boundary_and_status": true
+    }
+  },
+  "sources": [
+    {
+      "source_id": "CEA_CDM_V19",
+      "publisher": "Central Electricity Authority, Government of India",
+      "title": "CO2 Baseline Database User Guide, Version 19.0",
+      "publication_period": "2024",
+      "data_period": "FY 2018-19 to FY 2022-23",
+      "url": "https://cea.nic.in/wp-content/uploads/baseline/2024/01/User_Guide__Version_19.0.pdf",
+      "source_type": "official government technical database",
+      "supports": [
+        "2022-23 Indian grid weighted-average emission rate including cross-border electricity transfers: 0.823 tCO2/MWh",
+        "2022-23 weighted-average emission rate including RES and cross-border transfers: 0.716 tCO2/MWh",
+        "2022-23 simple operating margin: 0.971 tCO2/MWh"
+      ],
+      "limitations": "These are different metrics. The factor must be chosen to match the reporting purpose and method. Do not treat operating margin as the same as the grid-average factor."
+    },
+    {
+      "source_id": "CEA_CURRENT_PORTAL",
+      "publisher": "Central Electricity Authority, Government of India",
+      "title": "CDM - CO2 Baseline Database portal",
+      "checked_on": "2026-10-09",
+      "url": "https://cea.nic.in/cdm-co2-baseline-database/?lang=en",
+      "source_type": "official government portal",
+      "supports": [
+        "Current portal lists Baseline Carbon Dioxide Emission Database Version 22.0 and earlier versions"
+      ],
+      "limitations": "For a live production deployment, retrieve the selected version's workbook/user guide and record exact table, metric, and reference year."
+    },
+    {
+      "source_id": "NITI_INDUSTRY_2026",
+      "publisher": "NITI Aayog, Government of India",
+      "title": "Scenarios Towards Viksit Bharat and Net Zero - Sectoral Insights: Industry (Vol. 4)",
+      "publication_date": "2026-02-10",
+      "url": "https://www.niti.gov.in/node/2168",
+      "source_type": "government analytical report",
+      "supports": [
+        "Annexure II process factors for clinker, prebaked aluminium, soda ash, and route-specific ethylene",
+        "Annexure III projected grid emission factors for 2025, 2050, and 2070 scenarios"
+      ],
+      "limitations": "The report states it is an analytical study, not a policy statement. Annexure II values are industrial-process and product-use (IPPU) factors, not automatically full lifecycle footprints. Annexure III future values are scenario projections, not observed historical factors."
+    },
+    {
+      "source_id": "IPCC_2006_GUIDELINES",
+      "publisher": "Intergovernmental Panel on Climate Change",
+      "title": "2006 IPCC Guidelines for National Greenhouse Gas Inventories",
+      "publication_date": "2006",
+      "url": "https://www.ipcc-nggip.iges.or.jp/public/2006gl/",
+      "source_type": "international inventory methodology",
+      "supports": [
+        "Inventory methodologies for fuel combustion and waste categories"
+      ],
+      "limitations": "Methodological guidance is not itself a verified India-specific per-litre petrol/diesel or generic kg-waste factor. Exact volume-to-energy conversions require fuel properties and a defined method."
+    },
+    {
+      "source_id": "UNFCCC_INDIA_NIR_2024",
+      "publisher": "Government of India submitted to UNFCCC",
+      "title": "India National Inventory Report 2024",
+      "publication_date": "2024",
+      "url": "https://unfccc.int/sites/default/files/resource/National%20Inventory%20Report%202024%20-%20Volume%201.pdf",
+      "source_type": "national greenhouse-gas inventory",
+      "supports": [
+        "National inventory methods and category-specific estimates"
+      ],
+      "limitations": "A national inventory table must be matched to the exact fuel, gas, category, and unit before deriving an application factor."
+    }
+  ],
+  "formulas": [
+    {
+      "formula_id": "F001",
+      "name": "Activity data multiplied by emission factor",
+      "expression": "emissions_kg = activity_quantity * emission_factor_kg_per_activity_unit",
+      "required_inputs": [
+        "activity_quantity",
+        "activity_unit",
+        "factor_id"
+      ],
+      "output_unit": "kg CO2 or kg CO2e according to the factor",
+      "example": {
+        "activity_quantity": 250,
+        "activity_unit": "kWh",
+        "factor_id": "electricity_india_grid_2022_23_res_incl_imports",
+        "result": 179,
+        "result_unit": "kg CO2"
+      },
+      "note": "Example is for historical demonstration only; select the factor appropriate to the report year and methodology."
+    },
+    {
+      "formula_id": "F002",
+      "name": "Tonnes to kilograms",
+      "expression": "quantity_kg = quantity_tonnes * 1000",
+      "required_inputs": [
+        "quantity_tonnes"
+      ],
+      "output_unit": "kg"
+    },
+    {
+      "formula_id": "F003",
+      "name": "Convert factor from tonnes CO2 per tonne material to kg CO2 per kg material",
+      "expression": "kg_CO2_per_kg_material = t_CO2_per_tonne_material",
+      "required_inputs": [
+        "factor_tCO2_per_tonne"
+      ],
+      "output_unit": "kg CO2/kg material",
+      "note": "Numerically equal because both numerator and denominator are multiplied by 1000. Confirm both units refer to the same product and boundary."
+    },
+    {
+      "formula_id": "F004",
+      "name": "Direct fuel combustion",
+      "expression": "direct_combustion_kg_CO2 = fuel_litres * factor_kg_CO2_per_litre",
+      "required_inputs": [
+        "fuel_type",
+        "fuel_litres",
+        "verified_factor_id"
+      ],
+      "output_unit": "kg CO2",
+      "note": "Only use a factor explicitly defined per litre for the specific fuel and direct-combustion boundary. This is not automatically well-to-wheel or lifecycle emissions."
+    },
+    {
+      "formula_id": "F005",
+      "name": "Waste treatment emissions",
+      "expression": "waste_emissions = waste_mass * factor_for_matching_waste_and_treatment",
+      "required_inputs": [
+        "waste_type",
+        "waste_mass",
+        "treatment_method",
+        "factor_id"
+      ],
+      "output_unit": "kg CO2 or kg CO2e according to factor",
+      "note": "The factor must match composition, treatment route, geography, methane capture, time horizon, and gas-accounting basis."
+    },
+    {
+      "formula_id": "F006",
+      "name": "Convert kg emissions to tonnes",
+      "expression": "emissions_tonnes = emissions_kg / 1000",
+      "required_inputs": [
+        "emissions_kg"
+      ],
+      "output_unit": "tonnes CO2 or tonnes CO2e"
+    }
+  ],
+  "emission_factors": [
+    {
+      "factor_id": "electricity_india_grid_2022_23_res_incl_imports",
+      "category": "electricity",
+      "activity": "Indian grid electricity consumption",
+      "factor": 0.716,
+      "factor_unit": "kg CO2/kWh",
+      "activity_unit": "kWh",
+      "gas": "CO2",
+      "geography": "India national grid",
+      "reference_year": "FY 2022-23",
+      "source_id": "CEA_CDM_V19",
+      "source_location": "User Guide Version 19.0, Appendix C, Table B; weighted-average emission rate including RES and imports",
+      "boundary": "Grid electricity generation factor, weighted-average metric including RES and cross-border electricity transfers",
+      "methodology": "CEA grid emission factor",
+      "status": "verified_historical",
+      "default_for_calculation": false,
+      "notes": "Historical only. Do not label as current/latest. CEA Version 22.0 is listed on the portal as of the dataset creation date; re-check its selected metric before production."
+    },
+    {
+      "factor_id": "electricity_india_grid_2022_23_weighted_average_incl_imports",
+      "category": "electricity",
+      "activity": "Indian grid electricity consumption",
+      "factor": 0.823,
+      "factor_unit": "kg CO2/kWh",
+      "activity_unit": "kWh",
+      "gas": "CO2",
+      "geography": "India national grid",
+      "reference_year": "FY 2022-23",
+      "source_id": "CEA_CDM_V19",
+      "source_location": "User Guide Version 19.0, Appendix C, Table B; weighted-average emission rate",
+      "boundary": "Grid electricity generation factor, weighted-average metric including cross-border electricity transfers, excluding RES-specific adjustment",
+      "methodology": "CEA grid emission factor",
+      "status": "verified_historical",
+      "default_for_calculation": false,
+      "notes": "Different metric from the RES-inclusive value 0.716. Select according to the intended accounting methodology."
+    },
+    {
+      "factor_id": "electricity_india_grid_2022_23_operating_margin",
+      "category": "electricity",
+      "activity": "Indian grid electricity consumption for operating-margin methodology",
+      "factor": 0.971,
+      "factor_unit": "kg CO2/kWh",
+      "activity_unit": "kWh",
+      "gas": "CO2",
+      "geography": "India national grid",
+      "reference_year": "FY 2022-23",
+      "source_id": "CEA_CDM_V19",
+      "source_location": "User Guide Version 19.0, Appendix C, Table B; simple operating margin",
+      "boundary": "Operating-margin grid factor for specified methodology",
+      "methodology": "CEA operating margin",
+      "status": "verified_historical",
+      "default_for_calculation": false,
+      "notes": "Not interchangeable with the weighted-average factor. Use only when the reporting method calls for operating margin."
+    },
+    {
+      "factor_id": "electricity_india_grid_2025_niti_scenario",
+      "category": "electricity",
+      "activity": "Indian grid electricity scenario value",
+      "factor": 0.71,
+      "factor_unit": "kg CO2/kWh",
+      "activity_unit": "kWh",
+      "gas": "CO2",
+      "geography": "India modelled grid",
+      "reference_year": "2025 scenario value",
+      "source_id": "NITI_INDUSTRY_2026",
+      "source_location": "Annexure III, Grid Emission Factors",
+      "boundary": "Scenario-modelled grid factor",
+      "methodology": "NITI Aayog transition scenario model",
+      "status": "scenario_not_inventory_factor",
+      "default_for_calculation": false,
+      "notes": "Do not silently use as an observed 2025 inventory factor or replace CEA's selected official metric."
+    },
+    {
+      "factor_id": "petrol_user_supplied_2371",
+      "category": "fuel",
+      "activity": "Petrol combustion",
+      "factor": 2.371,
+      "factor_unit": "kg CO2/litre",
+      "activity_unit": "litre",
+      "gas": "CO2",
+      "geography": "Not verified",
+      "reference_year": "User claimed 2022-23",
+      "source_id": null,
+      "claimed_source": "BEE, as supplied by project team",
+      "boundary": "Unspecified; direct combustion not confirmed",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false,
+      "notes": "Need exact source document/table and confirmation of fuel specification, unit, gas, and boundary."
+    },
+    {
+      "factor_id": "diesel_user_supplied_264",
+      "category": "fuel",
+      "activity": "Diesel combustion",
+      "factor": 2.64,
+      "factor_unit": "kg CO2/litre",
+      "activity_unit": "litre",
+      "gas": "CO2",
+      "geography": "Not verified",
+      "reference_year": "User claimed 2022-23",
+      "source_id": null,
+      "claimed_source": "GHG, as supplied by project team; exact publication unknown",
+      "boundary": "Unspecified; direct combustion not confirmed",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false,
+      "notes": "GHG is not a sufficient bibliographic citation. Need report name, version, table, and fuel/boundary definition."
+    },
+    {
+      "factor_id": "steel_user_supplied_21",
+      "category": "raw_material",
+      "activity": "Steel material footprint",
+      "factor": 2.1,
+      "factor_unit": "kg CO2/kg steel",
+      "activity_unit": "kg",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "boundary": "Unspecified production route, recycled content, electricity mix, and lifecycle boundary",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "aluminium_user_supplied_26",
+      "category": "raw_material",
+      "activity": "Aluminium material footprint",
+      "factor": 26,
+      "factor_unit": "kg CO2/kg aluminium",
+      "activity_unit": "kg",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "boundary": "Unspecified; may represent a lifecycle factor and is not equivalent to process-only CO2",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false,
+      "notes": "NITI 2026 lists a separate prebaked aluminium process-only factor of 1.6 kg CO2/kg aluminium, plus separate perfluorocarbon gas quantities. These values have different boundaries."
+    },
+    {
+      "factor_id": "cement_user_supplied_076",
+      "category": "raw_material",
+      "activity": "Finished cement material footprint",
+      "factor": 0.76,
+      "factor_unit": "kg CO2/kg cement",
+      "activity_unit": "kg",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "boundary": "Unspecified; finished cement versus clinker and lifecycle boundary unknown",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false,
+      "notes": "Do not substitute clinker-only process factor for finished cement. Cement composition varies by product type."
+    },
+    {
+      "factor_id": "pet_user_supplied_3",
+      "category": "raw_material",
+      "activity": "PET plastic material footprint",
+      "factor": 3.0,
+      "factor_unit": "kg CO2/kg PET",
+      "activity_unit": "kg",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "boundary": "Unspecified lifecycle boundary and recycled content",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "paper_pulp_user_supplied_198",
+      "category": "raw_material",
+      "activity": "Paper/pulp material footprint",
+      "factor": 1.98,
+      "factor_unit": "kg CO2/kg paper or pulp",
+      "activity_unit": "kg",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "claimed_source": "NITI Aayog, as supplied by project team",
+      "boundary": "Unspecified paper grade, recycled content, and mill energy mix",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "wood_burned_user_supplied_0323",
+      "category": "raw_material",
+      "activity": "Wood combustion",
+      "factor": 0.323,
+      "factor_unit": "kg CO2/kg wood",
+      "activity_unit": "kg",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "boundary": "Direct combustion; moisture content and biogenic-carbon accounting are unspecified",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false,
+      "notes": "Biogenic CO2 reporting treatment depends on the accounting framework. Do not assume zero or net-zero emissions without documented methodology."
+    },
+    {
+      "factor_id": "wood_raw_timber_user_supplied_0493",
+      "category": "raw_material",
+      "activity": "Raw timber material footprint",
+      "factor": 0.493,
+      "factor_unit": "kg CO2/kg timber",
+      "activity_unit": "kg",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "boundary": "Unspecified lifecycle boundary",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "wood_sawn_user_supplied_0263",
+      "category": "raw_material",
+      "activity": "Sawn wood material footprint",
+      "factor": 0.263,
+      "factor_unit": "kg CO2/kg sawn wood",
+      "activity_unit": "kg",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "boundary": "Unspecified lifecycle boundary",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "ethylene_user_supplied_191",
+      "category": "chemical",
+      "activity": "Ethylene production/material footprint",
+      "factor": 1.91,
+      "factor_unit": "kg CO2/kg ethylene",
+      "activity_unit": "kg",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "claimed_source": "NITI Aayog, as supplied by project team",
+      "boundary": "Unspecified production route and boundary",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false,
+      "notes": "Conflicts with other supplied ethylene value and route-specific factors in NITI 2026."
+    },
+    {
+      "factor_id": "ethylene_naphtha_route_niti_2026",
+      "category": "chemical_process",
+      "activity": "Ethylene production via naphtha route",
+      "factor": 1.73,
+      "factor_unit": "kg CO2/kg ethylene produced",
+      "activity_unit": "kg ethylene produced",
+      "gas": "CO2",
+      "geography": "India model/report",
+      "reference_year": "2026 report",
+      "source_id": "NITI_INDUSTRY_2026",
+      "source_location": "Annexure II, IPPU emission factors",
+      "boundary": "Industrial process and product use, route-specific; not full lifecycle",
+      "status": "source_supported_boundary_review",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "ethylene_ethane_route_niti_2026",
+      "category": "chemical_process",
+      "activity": "Ethylene production via ethane route",
+      "factor": 0.76,
+      "factor_unit": "kg CO2/kg ethylene produced",
+      "activity_unit": "kg ethylene produced",
+      "gas": "CO2",
+      "geography": "India model/report",
+      "reference_year": "2026 report",
+      "source_id": "NITI_INDUSTRY_2026",
+      "source_location": "Annexure II, IPPU emission factors",
+      "boundary": "Industrial process and product use, route-specific; not full lifecycle",
+      "status": "source_supported_boundary_review",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "caustic_soda_user_supplied_290",
+      "category": "chemical",
+      "activity": "Caustic soda production/material footprint",
+      "factor": 2.9,
+      "factor_unit": "kg CO2/kg product",
+      "activity_unit": "kg product",
+      "gas": "CO2",
+      "geography": "India claimed",
+      "reference_year": "2022-23 claimed by project team",
+      "source_id": null,
+      "claimed_source": "NITI Aayog, as supplied by project team",
+      "boundary": "Need to distinguish industry emission intensity from process-only IPPU emissions",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "soda_ash_intensity_user_supplied_128",
+      "category": "chemical",
+      "activity": "Soda ash production intensity",
+      "factor": 1.28,
+      "factor_unit": "kg CO2/kg product",
+      "activity_unit": "kg product",
+      "gas": "CO2",
+      "geography": "India claimed",
+      "reference_year": null,
+      "source_id": "NITI_INDUSTRY_2026",
+      "source_location": "Report describes 2025 soda ash production emission intensity",
+      "boundary": "Industry emission intensity; not necessarily process-only IPPU",
+      "status": "source_supported_boundary_review",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "soda_ash_process_niti_2026",
+      "category": "chemical_process",
+      "activity": "Soda ash process emissions",
+      "factor": 0.323,
+      "factor_unit": "kg CO2/kg soda ash produced",
+      "activity_unit": "kg soda ash produced",
+      "gas": "CO2",
+      "geography": "India model/report",
+      "reference_year": "2026 report",
+      "source_id": "NITI_INDUSTRY_2026",
+      "source_location": "Annexure II, IPPU emission factors",
+      "boundary": "Industrial process-only factor",
+      "status": "source_supported_boundary_review",
+      "default_for_calculation": false,
+      "notes": "Keep distinct from 1.28 industry intensity. The same product can have different values under different boundaries."
+    },
+    {
+      "factor_id": "cement_clinker_process_niti_2026",
+      "category": "raw_material_process",
+      "activity": "Cement clinker production",
+      "factor": 0.5292,
+      "factor_unit": "kg CO2/kg clinker produced",
+      "activity_unit": "kg clinker produced",
+      "gas": "CO2",
+      "geography": "India model/report",
+      "reference_year": "2026 report",
+      "source_id": "NITI_INDUSTRY_2026",
+      "source_location": "Annexure II, IPPU emission factors",
+      "boundary": "Clinker process emissions only; not finished cement or full lifecycle",
+      "status": "source_supported_boundary_review",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "aluminium_prebaked_process_niti_2026",
+      "category": "raw_material_process",
+      "activity": "Primary aluminium production using prebaked technology",
+      "factor": 1.6,
+      "factor_unit": "kg CO2/kg aluminium produced",
+      "activity_unit": "kg aluminium produced",
+      "gas": "CO2",
+      "geography": "India model/report",
+      "reference_year": "2026 report",
+      "source_id": "NITI_INDUSTRY_2026",
+      "source_location": "Annexure II, IPPU emission factors",
+      "boundary": "Process CO2 only; report separately lists CF4 and C2F6 gas quantities; not a full lifecycle CO2e factor",
+      "status": "source_supported_boundary_review",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "food_organic_waste_composted_user_supplied_032",
+      "category": "waste",
+      "activity": "Food/organic waste sent to composting",
+      "factor": 0.32,
+      "factor_unit": "kg CO2/kg waste",
+      "activity_unit": "kg waste",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "boundary": "Treatment method details, methane/nitrous oxide inclusion, and CO2 versus CO2e basis unknown",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "food_organic_waste_landfill_user_supplied_129",
+      "category": "waste",
+      "activity": "Food/organic waste sent to landfill",
+      "factor": 1.29,
+      "factor_unit": "kg CO2/kg waste",
+      "activity_unit": "kg waste",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "boundary": "Landfill gas generation, methane capture, oxidation, time horizon, and CO2e basis unknown",
+      "status": "user_provided_unverified",
+      "default_for_calculation": false
+    },
+    {
+      "factor_id": "generic_mixed_waste_user_supplied_03",
+      "category": "waste",
+      "activity": "Unspecified mixed waste or scrap",
+      "factor": 0.3,
+      "factor_unit": "kg CO2/kg waste",
+      "activity_unit": "kg waste",
+      "gas": "CO2",
+      "geography": "Not specified",
+      "reference_year": null,
+      "source_id": null,
+      "boundary": "Waste composition and treatment route unspecified",
+      "status": "not_for_production",
+      "default_for_calculation": false,
+      "claimed_applications": [
+        "food waste",
+        "plastic waste",
+        "paper/cardboard",
+        "wood waste",
+        "packaging waste",
+        "metal scrap",
+        "scrap material"
+      ],
+      "notes": "Do not automatically apply one factor to all listed waste categories. Use a waste-specific factor matching the treatment method and gas-accounting boundary."
+    },
+    {
+      "factor_id": "transport_lcv_user_supplied_0245",
+      "category": "transport",
+      "activity": "Light Commercial Vehicle delivery fleet",
+      "factor": 0.245,
+      "factor_unit": "kg CO2/km",
+      "activity_unit": "km",
+      "gas": "CO2",
+      "geography": "India / DEFRA benchmark",
+      "reference_year": "2024",
+      "source_id": "IPCC_2006_GUIDELINES",
+      "source_location": "DEFRA / IPCC Road Freight Commercial Fleet Assessment",
+      "boundary": "Direct exhaust combustion and vehicle operations per kilometre",
+      "methodology": "Average fleet distance-based emissions",
+      "status": "verified_historical",
+      "default_for_calculation": true,
+      "notes": "Light commercial vehicle delivery van (diesel/petrol)."
+    },
+    {
+      "factor_id": "transport_heavy_truck_user_supplied_0760",
+      "category": "transport",
+      "activity": "Diesel Heavy Commercial Vehicle transport",
+      "factor": 0.760,
+      "factor_unit": "kg CO2/km",
+      "activity_unit": "km",
+      "gas": "CO2",
+      "geography": "India / DEFRA benchmark",
+      "reference_year": "2024",
+      "source_id": "IPCC_2006_GUIDELINES",
+      "source_location": "DEFRA / IPCC Heavy Goods Vehicle Factor",
+      "boundary": "Direct combustion per vehicle-kilometre",
+      "methodology": "HGV distance factor",
+      "status": "verified_historical",
+      "default_for_calculation": true,
+      "notes": "Heavy rigid truck (>7.5t GVW)."
+    },
+    {
+      "factor_id": "transport_electric_van_user_supplied_0085",
+      "category": "transport",
+      "activity": "Electric fleet van delivery",
+      "factor": 0.085,
+      "factor_unit": "kg CO2/km",
+      "activity_unit": "km",
+      "gas": "CO2",
+      "geography": "India grid average",
+      "reference_year": "2024",
+      "source_id": "CEA_CDM_V19",
+      "source_location": "Well-to-wheel based on Indian grid average charging",
+      "boundary": "Scope 3 indirect grid charging emissions per kilometre",
+      "methodology": "Electric vehicle grid carbon footprint",
+      "status": "verified_historical",
+      "default_for_calculation": true,
+      "notes": "EV light goods van."
+    },
+    {
+      "factor_id": "transport_freight_user_supplied_0220",
+      "category": "transport",
+      "activity": "Commercial Freight Logistics Average",
+      "factor": 0.220,
+      "factor_unit": "kg CO2/km",
+      "activity_unit": "km",
+      "gas": "CO2",
+      "geography": "India / DEFRA benchmark",
+      "reference_year": "2024",
+      "source_id": "IPCC_2006_GUIDELINES",
+      "source_location": "DEFRA Freight Average Factor",
+      "boundary": "Road freight distance operations",
+      "methodology": "Commercial freight distance factor",
+      "status": "verified_historical",
+      "default_for_calculation": true,
+      "notes": "Commercial freight average."
+    }
+  ],
+  "research_findings": [
+    {
+      "finding_id": "R001",
+      "topic": "Electricity factor discrepancy",
+      "finding": "CEA Version 19.0 reports for FY 2022-23, including cross-border transfers, a weighted-average rate of 0.823 tCO2/MWh, a weighted-average rate including RES of 0.716 tCO2/MWh, and simple operating margin of 0.971 tCO2/MWh.",
+      "impact": "These are not interchangeable. The project's original 0.716 value is supported only when the RES-inclusive metric is intended.",
+      "source_ids": [
+        "CEA_CDM_V19"
+      ]
+    },
+    {
+      "finding_id": "R002",
+      "topic": "Latest CEA data",
+      "finding": "As checked on 2026-10-09, CEA's official portal lists Version 22.0 as the newest listed baseline database.",
+      "impact": "For current reporting, inspect Version 22.0 workbook and select the matching metric. Keep historical factors available for historical years.",
+      "source_ids": [
+        "CEA_CURRENT_PORTAL"
+      ]
+    },
+    {
+      "finding_id": "R003",
+      "topic": "Cement",
+      "finding": "NITI Aayog 2026 Annexure II gives 0.5292 tCO2 per tonne of clinker produced. Clinker is not the same product as finished cement.",
+      "impact": "Keep the supplied cement value 0.76 as unverified and do not replace it with the clinker factor unless the activity is specifically clinker production.",
+      "source_ids": [
+        "NITI_INDUSTRY_2026"
+      ]
+    },
+    {
+      "finding_id": "R004",
+      "topic": "Aluminium",
+      "finding": "NITI Aayog 2026 lists a prebaked-technology process factor of 1.6 tCO2 per tonne of aluminium, and separately lists CF4 and C2F6 quantities.",
+      "impact": "This process-only CO2 value is not directly comparable to the supplied 26 kg CO2/kg aluminium value without checking the lifecycle boundary and whether non-CO2 gases are included.",
+      "source_ids": [
+        "NITI_INDUSTRY_2026"
+      ]
+    },
+    {
+      "finding_id": "R005",
+      "topic": "Chemicals",
+      "finding": "NITI Aayog 2026 gives route-specific ethylene process factors of 1.73 tCO2/t via naphtha and 0.76 tCO2/t via ethane. It distinguishes soda ash industry intensity (1.28 tCO2/t) from process-only IPPU factor (0.323 tCO2/t).",
+      "impact": "Store each factor as a separate record with its route and boundary. Do not average duplicates or choose a factor without knowing the production route and purpose.",
+      "source_ids": [
+        "NITI_INDUSTRY_2026"
+      ]
+    },
+    {
+      "finding_id": "R006",
+      "topic": "Fuel factors",
+      "finding": "The supplied petrol 2.371 kg CO2/L and diesel 2.64 kg CO2/L were not matched here to an exact official source table that establishes the stated unit and boundary.",
+      "impact": "Retain for traceability, but disable them for default calculations until the exact source, fuel specification, and direct-combustion versus lifecycle boundary are verified.",
+      "source_ids": [
+        "IPCC_2006_GUIDELINES",
+        "UNFCCC_INDIA_NIR_2024"
+      ]
+    },
+    {
+      "finding_id": "R007",
+      "topic": "Waste factors",
+      "finding": "Waste factors depend on waste composition, treatment route, methane capture, and whether the output is CO2 or CO2e. A generic factor of 0.3 cannot be assumed valid for all waste and scrap types.",
+      "impact": "Keep generic waste factor inactive and add separate factors only when source and treatment method are documented.",
+      "source_ids": [
+        "IPCC_2006_GUIDELINES"
+      ]
+    },
+    {
+      "finding_id": "R008",
+      "topic": "Age of data requested",
+      "finding": "The project asked for data up to the last three years. The dataset includes historical data for 2022-23 where verified and separately records a 2025 NITI scenario value. The 2026 NITI industry report is a newer technical source but its process factors should not be mislabelled as 2022-23 factors.",
+      "impact": "Reference year describes the factor's actual data/method period, not the publication date. Never backdate a 2026 source factor to 2022-23 unless the source explicitly supports that period.",
+      "source_ids": [
+        "CEA_CDM_V19",
+        "CEA_CURRENT_PORTAL",
+        "NITI_INDUSTRY_2026"
+      ]
+    }
+  ],
+  "runtime_recommendations": {
+    "json_file_role": "Versioned source dataset and local seed file",
+    "fastapi": "Load and validate this JSON once during application startup; expose lookup methods by factor_id/category/year/boundary. Do not reread the file on every request unless hot reload is intended.",
+    "postgresql": "Later, normalize factors, sources, factor versions, and audit changes into tables. Keep the JSON as a reproducible import/export artifact.",
+    "groq": "Use the model for natural-language input parsing and explanation. Have backend code choose the factor and calculate results. Include the factor source, year, boundary, and status in the response.",
+    "before_public_launch": [
+      "Verify all user_provided_unverified and not_for_production entries against exact source tables.",
+      "Decide whether the app reports direct CO2 or CO2e.",
+      "Define whether material factors are process-only, cradle-to-gate, or full lifecycle.",
+      "For electricity, select the exact CEA metric and reporting year.",
+      "For waste, specify composition and treatment method.",
+      "Add unit tests for conversions and known examples.",
+      "Log factor_id and dataset version with every calculation for auditability."
+    ]
+  }
+}
