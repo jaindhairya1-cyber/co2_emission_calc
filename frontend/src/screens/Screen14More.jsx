@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { BookOpen, Settings, Shield, FileText, Mail, ChevronRight, ExternalLink, X, Info, Check, RefreshCw, Globe, Sliders, Cookie } from 'lucide-react';
+import { BookOpen, Settings, Shield, FileText, Mail, ChevronRight, ExternalLink, X, Info, Check, RefreshCw, Globe, Sliders, Cookie, ChevronLeft } from 'lucide-react';
 import { ELECTRICITY_FACTORS, FUEL_FACTORS, TRANSPORT_FACTORS, MATERIAL_FACTORS, WASTE_FACTORS } from '../data/emissionFactors';
 import { useApp } from '../context/AppContext';
 import BottomNavBar from '../components/BottomNavBar';
 
 export default function Screen14More() {
-  const { tempId, createNewTempId } = useApp();
+  const { tempId, createNewTempId, navigateTo, goBack } = useApp();
   const [showFactorsModal, setShowFactorsModal] = useState(false);
   const [activeModalTab, setActiveModalTab] = useState('electricity');
   
@@ -23,12 +23,35 @@ export default function Screen14More() {
   return (
     <div className="screen-container app-screen with-bottom-nav">
       <div className="app-header-bar">
-        <h1 className="results-title">More</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            className="wizard-back-btn"
+            onClick={goBack}
+            aria-label="Back"
+            title="Go back"
+          >
+            <ChevronLeft size={22} />
+          </button>
+          <h1 className="results-title" style={{ margin: 0 }}>More</h1>
+        </div>
       </div>
 
       <div className="profile-scroll-content">
         {/* Menu items */}
         <div className="menu-group-card">
+          <button
+            type="button"
+            className="menu-row-item"
+            onClick={() => navigateTo(12)}
+          >
+            <div className="menu-item-left">
+              <FileText size={18} className="menu-item-icon text-emerald" />
+              <span className="menu-item-label font-semibold">Reports & Audit Certificates</span>
+            </div>
+            <ChevronRight size={18} className="menu-chevron" />
+          </button>
+
           <button
             type="button"
             className="menu-row-item"

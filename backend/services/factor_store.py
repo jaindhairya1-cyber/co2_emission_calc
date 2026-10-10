@@ -25,10 +25,13 @@ DEFAULT_ELECTRICITY_FACTOR_ID = "electricity_india_grid_2022_23_res_incl_imports
 FUEL_TYPES = {
     "Petrol": "petrol_user_supplied_2371",
     "Diesel": "diesel_user_supplied_264",
+    "LPG": "fuel_lpg_1512",
 }
 MATERIAL_TYPES = {
     "Steel": "steel_user_supplied_21",
     "Aluminium": "aluminium_user_supplied_26",
+    "Cotton yarn": "material_cotton_yarn_3540",
+    "Plastic polymers": "material_plastic_polymers_2150",
     "Cement": "cement_user_supplied_076",
     "PET plastic": "pet_user_supplied_3",
     "Paper / pulp": "paper_pulp_user_supplied_198",
@@ -42,6 +45,8 @@ MATERIAL_TYPES = {
     "Cement clinker (process)": "cement_clinker_process_niti_2026",
 }
 WASTE_TYPES = {
+    "General waste": "waste_general_mixed_0580",
+    "Metal scrap": "waste_metal_scrap_0150",
     "Food / organic waste (composted)": "food_organic_waste_composted_user_supplied_032",
     "Food / organic waste (landfill)": "food_organic_waste_landfill_user_supplied_129",
 }
@@ -50,6 +55,7 @@ TRANSPORT_TYPES = {
     "Diesel Truck (Heavy)": "transport_heavy_truck_user_supplied_0760",
     "Electric Fleet Van": "transport_electric_van_user_supplied_0085",
     "Commercial Freight": "transport_freight_user_supplied_0220",
+    "Commercial Fleet": "transport_freight_user_supplied_0220",
 }
 SCOPE_BY_CATEGORY = {"fuel": 1, "electricity": 2, "materials": 3, "waste": 3, "transport": 3}
 

@@ -26,8 +26,18 @@ const SCREENS = [
 ];
 
 function generateRandomTempId() {
-  const num = Math.floor(1000 + Math.random() * 9000);
-  return `TEMP-MSME-${num}`;
+  const chars = '0123456789ABCDEF';
+  let rand = '';
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    const bytes = new Uint8Array(4);
+    window.crypto.getRandomValues(bytes);
+    rand = Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join('');
+  } else {
+    for (let i = 0; i < 8; i++) {
+      rand += chars[Math.floor(Math.random() * chars.length)];
+    }
+  }
+  return `TEMP-MSME-${rand}`;
 }
 
 const DEFAULT_STATE = {
@@ -397,7 +407,8 @@ export function AppProvider({ children }) {
   const whatIfResult = calculateWhatIfImpact(
     footprint.baselineTotal || footprint.total,
     appData.whatIf.category,
-    appData.whatIf.reductionPct
+    appData.whatIf.reductionPct,
+    localFootprint.annualElecKwh || 144000
   );
 
   return (

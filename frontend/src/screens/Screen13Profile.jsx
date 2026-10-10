@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Bell, BookOpen, Settings, HelpCircle, FileText, Shield, Mail,
   ChevronRight, Zap, RefreshCw, Copy, Check, LogOut, User, Building,
-  Key, CheckCircle2, AlertCircle, ArrowUpRight
+  Key, CheckCircle2, AlertCircle, ArrowUpRight, ChevronLeft
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import BottomNavBar from '../components/BottomNavBar';
@@ -14,6 +14,7 @@ export default function Screen13Profile() {
     tempId,
     createNewTempId,
     navigateTo,
+    goBack,
     authUser,
     handleSignOut
   } = useApp();
@@ -45,7 +46,18 @@ export default function Screen13Profile() {
     <div className="screen-container app-screen with-bottom-nav">
       {/* App Header */}
       <div className="app-header-bar">
-        <h1 className="results-title">Profile & Account</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            className="wizard-back-btn"
+            onClick={goBack}
+            aria-label="Back"
+            title="Go back"
+          >
+            <ChevronLeft size={22} />
+          </button>
+          <h1 className="results-title" style={{ margin: 0 }}>Profile & Account</h1>
+        </div>
         <div className="header-actions">
           <button
             type="button"

@@ -51,7 +51,21 @@ function makeActivityRecords(draft, category) {
   };
 
   if (category === 'Electricity') {
-    add('Grid electricity', getValue(data, 'units_consumed_kwh'), 'kWh');
+    let units = getValue(data, 'units_consumed_kwh');
+    if (!units || Number(units) <= 0) {
+      const curr = getValue(data, 'current_reading');
+      const prev = getValue(data, 'previous_reading');
+      if (curr && prev && Number(curr) > Number(prev)) {
+        units = Number(curr) - Number(prev);
+      }
+    }
+    if (!units || Number(units) <= 0) {
+      const amt = getValue(data, 'amount') || getValue(draft.common_fields, 'total_amount_inr');
+      if (amt && Number(amt) > 0) {
+        units = Math.round(Number(amt) / 10.18);
+      }
+    }
+    add('Grid electricity', units, 'kWh');
   } else if (category === 'Fuel') {
     (Array.isArray(data.line_items) ? data.line_items : []).forEach((item) => {
       add(item.fuel_type, item.quantity, item.unit);
@@ -61,22 +75,56 @@ function makeActivityRecords(draft, category) {
       add('Petrol', getValue(data, 'petrol_litres'), 'Litres');
       add('LPG', getValue(data, 'lpg_cylinders'), 'nos');
     }
+    if (!records.length) {
+      const amt = getValue(data, 'amount') || getValue(draft.common_fields, 'total_amount_inr');
+      if (amt && Number(amt) > 0) {
+        add('Diesel', Math.round(Number(amt) / 90), 'Litres');
+      }
+    }
   } else if (category === 'Transport') {
-    const type = getValue(data, 'vehicle_type');
-    add(type, getValue(data, 'total_distance_km'), 'km');
+    const type = getValue(data, 'vehicle_type') || 'Light Commercial Vehicle';
+    let km = getValue(data, 'total_distance_km');
+    if (!km || Number(km) <= 0) {
+      const amt = getValue(data, 'amount') || getValue(draft.common_fields, 'total_amount_inr');
+      if (amt && Number(amt) > 0) {
+        km = Math.round(Number(amt) / 45);
+      }
+    }
+    add(type, km, 'km');
   } else if (category === 'Materials') {
     (Array.isArray(data.line_items) ? data.line_items : []).forEach((item) => {
-      add(item.material_type || item.item_name, item.weight_kg ?? item.quantity, item.weight_kg != null ? 'kg' : item.unit);
+      let mtype = item.material_type || item.item_name || 'Cotton Fabric';
+      const mtypeLower = String(mtype).toLowerCase();
+      if (mtypeLower.includes('cotton') || mtypeLower.includes('fabric') || mtypeLower.includes('yarn')) mtype = 'Cotton Fabric';
+      else if (mtypeLower.includes('poly') || mtypeLower.includes('plastic')) mtype = 'Polyester Yarn';
+      else if (mtypeLower.includes('steel') || mtypeLower.includes('metal')) mtype = 'Steel';
+      else if (mtypeLower.includes('carton') || mtypeLower.includes('cardboard') || mtypeLower.includes('pack')) mtype = 'Cardboard';
+      else if (mtypeLower.includes('alumin')) mtype = 'Aluminum';
+      else mtype = 'Cotton Fabric';
+      add(mtype, item.weight_kg ?? item.quantity, item.weight_kg != null ? 'kg' : item.unit || 'kg');
     });
     if (!records.length) {
-      add('Cotton yarn', getValue(data, 'cotton_kg'), 'kg');
+      add('Cotton Fabric', getValue(data, 'cotton_kg'), 'kg');
       add('Polyester Yarn', getValue(data, 'polyester_kg'), 'kg');
+      add('Cotton Fabric', getValue(data, 'total_material_weight_kg'), 'kg');
+    }
+    if (!records.length) {
+      const amt = getValue(data, 'amount') || getValue(draft.common_fields, 'total_amount_inr');
+      if (amt && Number(amt) > 0) {
+        add('Cotton Fabric', Math.round(Number(amt) / 310), 'kg');
+      }
     }
   } else if (category === 'Waste') {
     (Array.isArray(data.line_items) ? data.line_items : []).forEach((item) => {
       add(item.waste_type, item.quantity_kg, 'kg');
     });
     if (!records.length) add('General waste', getValue(data, 'total_waste_kg'), 'kg');
+    if (!records.length) {
+      const amt = getValue(data, 'amount') || getValue(draft.common_fields, 'total_amount_inr');
+      if (amt && Number(amt) > 0) {
+        add('General waste', Math.round(Number(amt) / 5.5), 'kg');
+      }
+    }
   }
   return records;
 }
@@ -84,22 +132,34 @@ function makeActivityRecords(draft, category) {
 function editableFields(fields, onChange) {
   return Object.entries(fields || {})
     .filter(([, field]) => field && typeof field === 'object' && 'value' in field && !Array.isArray(field.value))
-    .map(([key, field]) => (
-      <label className="form-group" key={key}>
-        <span className="form-label">{key.replaceAll('_', ' ')}</span>
-        <input
-          className="form-input"
-          type={typeof field.value === 'number' ? 'number' : 'text'}
-          value={field.value ?? ''}
-          onChange={(event) => onChange(key, event.target.value === '' ? null : (
-            typeof field.value === 'number' ? Number(event.target.value) : event.target.value
-          ))}
-        />
-        {field.value != null && field.confidence != null && (
-          <small className="text-muted">Confidence: {Math.round(field.confidence * 100)}%</small>
-        )}
-      </label>
-    ));
+    .map(([key, field]) => {
+      const isNumeric = key.includes('amount') || key.includes('reading') || key.includes('kwh') || key.includes('litres') || key.includes('cylinders') || key.includes('distance') || key.includes('weight') || key.includes('total_') || key.includes('units') || typeof field.value === 'number';
+      return (
+        <label className="form-group" key={key}>
+          <span className="form-label">{key.replaceAll('_', ' ')}</span>
+          <input
+            className="form-input"
+            type={isNumeric ? 'number' : 'text'}
+            value={field.value ?? ''}
+            placeholder={isNumeric ? '0' : 'Enter value'}
+            onChange={(event) => {
+              const raw = event.target.value;
+              if (raw === '') {
+                onChange(key, null);
+              } else if (isNumeric) {
+                const parsed = Number(raw);
+                onChange(key, isNaN(parsed) ? raw : parsed);
+              } else {
+                onChange(key, raw);
+              }
+            }}
+          />
+          {field.value != null && field.confidence != null && (
+            <small className="text-muted">Confidence: {Math.round(field.confidence * 100)}%</small>
+          )}
+        </label>
+      );
+    });
 }
 
 export default function BillUploadReview({ category, tempId, appData, onConfirmed, onBusinessSuggestion }) {

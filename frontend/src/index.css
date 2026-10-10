@@ -1436,6 +1436,12 @@ body {
   letter-spacing: -0.02em;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .btn-icon-header {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;

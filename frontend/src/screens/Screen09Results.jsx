@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ChevronDown, Lightbulb, TrendingDown, ArrowUpRight, Info, CheckCircle2, AlertTriangle, HelpCircle } from 'lucide-react';
+import { ChevronDown, Lightbulb, TrendingDown, ArrowUpRight, Info, CheckCircle2, AlertTriangle, HelpCircle, ChevronLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import BottomNavBar from '../components/BottomNavBar';
 import CalculationPanel from '../components/CalculationPanel';
 
 export default function Screen09Results() {
-  const { footprint, navigateTo } = useApp();
+  const { footprint, navigateTo, goBack } = useApp();
   const [period, setPeriod] = useState('This year');
   const [activeSubTab, setActiveSubTab] = useState('Overview');
   const [selectedSegment, setSelectedSegment] = useState(null);
@@ -43,9 +43,20 @@ export default function Screen09Results() {
     <div className="screen-container app-screen with-bottom-nav">
       {/* Top Header */}
       <div className="results-top-header">
-        <div>
-          <h1 className="results-title">Results</h1>
-          <p className="screen-subtitle-muted">Easy-to-understand carbon footprint breakdown</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            className="wizard-back-btn"
+            onClick={goBack}
+            aria-label="Back"
+            title="Go back"
+          >
+            <ChevronLeft size={22} />
+          </button>
+          <div>
+            <h1 className="results-title">Results</h1>
+            <p className="screen-subtitle-muted">Easy-to-understand carbon footprint breakdown</p>
+          </div>
         </div>
 
         <div className="period-dropdown-box">

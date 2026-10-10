@@ -1,9 +1,9 @@
 import React from 'react';
-import { ArrowRight, Zap, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function Screen01Splash() {
-  const { navigateTo, tempId } = useApp();
+  const { navigateTo } = useApp();
 
   return (
     <div className="screen-container splash-screen">
@@ -36,20 +36,6 @@ export default function Screen01Splash() {
             <span>Get Started</span>
             <ArrowRight size={18} />
           </button>
-
-          <div className="splash-temp-id-box">
-            <div className="temp-id-badge-row">
-              <Zap size={14} className="text-emerald" />
-              <span className="temp-text">Temporary ID ready: <strong>{tempId}</strong></span>
-            </div>
-            <button
-              id="btn-instant-temp-access"
-              className="btn-text-link"
-              onClick={() => navigateTo(3)}
-            >
-              Quick start directly with Temporary ID →
-            </button>
-          </div>
         </div>
       </div>
     </div>

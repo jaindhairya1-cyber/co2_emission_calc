@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Bell, ArrowDownRight, FileEdit, Award, ChevronRight, Sparkles, FileText, Download } from 'lucide-react';
+import { Bell, ArrowDownRight, FileEdit, Award, ChevronRight, Sparkles, FileText, Download, ChevronLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import BottomNavBar from '../components/BottomNavBar';
 import SmartBillModal from '../components/SmartBillModal';
 
 export default function Screen08Dashboard() {
-  const { appData, footprint, navigateTo, tempId, whatIfResult } = useApp();
+  const { appData, footprint, navigateTo, goBack, tempId, whatIfResult } = useApp();
   const business = appData.business;
   const [showBillModal, setShowBillModal] = useState(false);
 
@@ -14,6 +14,16 @@ export default function Screen08Dashboard() {
       {/* Clean App Header Bar */}
       <div className="app-header-bar">
         <div className="app-logo-area">
+          <button
+            type="button"
+            className="wizard-back-btn"
+            onClick={goBack}
+            aria-label="Back"
+            title="Go back"
+            style={{ marginRight: '6px' }}
+          >
+            <ChevronLeft size={22} />
+          </button>
           <div className="header-leaf-icon">
             <img src="/logo.png" alt="TerraAI Logo" className="header-logo-img" />
           </div>
@@ -24,7 +34,17 @@ export default function Screen08Dashboard() {
           <button
             type="button"
             className="btn-icon-header"
-            onClick={() => alert(`Active Session: ${tempId}\nVerified Carbon Audit for ${business.name}`)}
+            onClick={() => navigateTo(12)}
+            aria-label="Reports and Certificates"
+            title="Download Reports & Certificates"
+            id="header-reports-btn"
+          >
+            <FileText size={18} />
+          </button>
+          <button
+            type="button"
+            className="btn-icon-header"
+            onClick={() => alert(`Active Session: ${tempId}\nVerified Carbon Audit for ${business.name || 'Your Business'}`)}
             aria-label="Notifications"
           >
             <Bell size={20} />

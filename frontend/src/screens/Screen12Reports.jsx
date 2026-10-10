@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Edit2, Download, FileSpreadsheet, FileText, ArrowDownRight, Check, AlertCircle, RefreshCw } from 'lucide-react';
+import { Bell, Edit2, Download, FileSpreadsheet, FileText, ArrowDownRight, Check, AlertCircle, RefreshCw, ChevronLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import BottomNavBar from '../components/BottomNavBar';
 
 export default function Screen12Reports() {
-  const { appData, footprint, navigateTo, tempId, authUser } = useApp();
+  const { appData, footprint, navigateTo, goBack, tempId, authUser } = useApp();
   const business = appData.business;
 
   const repName = authUser?.user_metadata?.full_name || business.ownerName || 'MSME Administrator';
@@ -120,7 +120,18 @@ export default function Screen12Reports() {
   return (
     <div className="screen-container app-screen with-bottom-nav">
       <div className="app-header-bar">
-        <h1 className="results-title">Reports</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            className="wizard-back-btn"
+            onClick={goBack}
+            aria-label="Back"
+            title="Go back"
+          >
+            <ChevronLeft size={22} />
+          </button>
+          <h1 className="results-title" style={{ margin: 0 }}>Reports</h1>
+        </div>
         <div className="header-actions">
           <button
             type="button"

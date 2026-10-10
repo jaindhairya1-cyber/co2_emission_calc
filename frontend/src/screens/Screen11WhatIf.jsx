@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ExternalLink, Zap, Flame, Truck, Box, Trash2, Sliders, BookOpen, Layers, Check, Calculator, RefreshCw } from 'lucide-react';
+import { ExternalLink, Zap, Flame, Truck, Box, Trash2, Sliders, BookOpen, Layers, Check, Calculator, RefreshCw, ChevronLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import BottomNavBar from '../components/BottomNavBar';
 import { ELECTRICITY_FACTORS, FUEL_FACTORS, MATERIAL_FACTORS, WASTE_FACTORS } from '../data/emissionFactors';
 
 export default function Screen11WhatIf() {
-  const { appData, updateWhatIf, whatIfResult, footprint, navigateTo } = useApp();
+  const { appData, updateWhatIf, whatIfResult, footprint, navigateTo, goBack } = useApp();
   const { category, reductionPct } = appData.whatIf;
 
   // Same-place toggle mode: 'both' (unified overview) or switch tabs between 'roi' and 'factors'
@@ -59,7 +59,16 @@ export default function Screen11WhatIf() {
   return (
     <div className="screen-container app-screen with-bottom-nav">
       {/* Top Header */}
-      <div className="whatif-header-bar">
+      <div className="whatif-header-bar" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <button
+          type="button"
+          className="wizard-back-btn"
+          onClick={goBack}
+          aria-label="Back"
+          title="Go back"
+        >
+          <ChevronLeft size={22} />
+        </button>
         <div>
           <h1 className="whatif-title">ROI & Emission Factors</h1>
           <p className="screen-subtitle-muted">Simulate clean energy payback & inspect statutory factors in one place</p>

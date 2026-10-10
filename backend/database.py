@@ -397,6 +397,29 @@ def save_confirmed_activities(
                         None
                     )
                 if factor_entry is None:
+                    act_lower = activity_type.lower()
+                    if domain_key == "materials":
+                        if any(w in act_lower for w in ["cotton", "fabric", "yarn", "textile", "raw material", "material", "greige", "cloth"]):
+                            factor_entry = category_factors.get("Cotton Fabric")
+                        elif any(w in act_lower for w in ["poly", "polyester", "synthetic", "plastic", "pet", "polymer", "button"]):
+                            factor_entry = category_factors.get("Polyester Yarn")
+                        elif any(w in act_lower for w in ["steel", "iron", "metal", "zipper"]):
+                            factor_entry = category_factors.get("Steel")
+                        elif any(w in act_lower for w in ["aluminum", "aluminium"]):
+                            factor_entry = category_factors.get("Aluminum")
+                        elif any(w in act_lower for w in ["box", "carton", "cardboard", "paper", "packaging"]):
+                            factor_entry = category_factors.get("Cardboard")
+                        else:
+                            factor_entry = category_factors.get("Cotton Fabric") or list(category_factors.values())[0]
+                    elif domain_key == "waste":
+                        if any(w in act_lower for w in ["chemical", "sludge", "dye", "hazard", "toxic"]):
+                            factor_entry = category_factors.get("Hazardous chemical waste")
+                        elif any(w in act_lower for w in ["recycle", "scrap", "metal", "plastic", "fabric"]):
+                            factor_entry = category_factors.get("Recycled metal/plastic")
+                        else:
+                            factor_entry = category_factors.get("General waste") or list(category_factors.values())[0]
+
+                if factor_entry is None:
                     raise ValueError(f"No configured emission factor matches '{activity_type}'. Please choose a supported type.")
                 factor = factor_entry["factor"]
 

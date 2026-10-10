@@ -26,7 +26,7 @@ export function calculateFootprint(data, appliedActionIds = []) {
 
   // 3. Transport (Scope 3)
   let rawTransportEmissions = 0;
-  if (data.transport && (data.transport.distance_km !== undefined && data.transport.distance_km !== null)) {
+  if (data.transport && (data.transport.distance_km !== undefined && data.transport.distance_km !== null && data.transport.distance_km !== '')) {
     const dist = parseFloat(data.transport.distance_km || 0);
     const transPeriod = data.transport.period || 'Monthly';
     const transMultiplier = transPeriod === 'Monthly' ? 12 : transPeriod === 'Quarterly' ? 4 : 1;
@@ -35,7 +35,7 @@ export function calculateFootprint(data, appliedActionIds = []) {
     const factorObj = TRANSPORT_FACTORS[vType] || TRANSPORT_FACTORS['Commercial Fleet'] || { factor: 0.220 };
     rawTransportEmissions = (annualKm * factorObj.factor) / 1000;
   } else {
-    rawTransportEmissions = data.transportEmissions || 34.7;
+    rawTransportEmissions = parseFloat(data.transportEmissions || 0);
   }
 
   // 4. Materials (Scope 3)
@@ -60,21 +60,14 @@ export function calculateFootprint(data, appliedActionIds = []) {
     rawWasteEmissions += (annualQty * factorObj.factor) / 1000;
   });
 
-  // Additional Scope 1 emissions (e.g. process boilers / fugitive)
-  const additionalScope1 = data.additionalScope1 !== undefined ? data.additionalScope1 : (rawFuelEmissions > 0 ? 16.4 : 0);
+  // Scope 1, Scope 2, Scope 3 Totals
+  const additionalScope1 = parseFloat(data.additionalScope1 || 0);
   const rawScope1 = rawFuelEmissions + additionalScope1;
   const rawScope3 = rawMaterialEmissions + rawWasteEmissions + rawTransportEmissions;
 
-  // Calibration check for default initial demo state:
-  const isDefaultBenchmark = 
-    data.business?.name === 'ABC Textiles' && 
-    elecAmount === 12000 && 
-    (fuels[0]?.quantity === 500 || fuels[0]?.quantity === '500') &&
-    (data.transport?.distance_km === 3800 || !data.transport?.distance_km);
-
-  let scope1 = isDefaultBenchmark ? 32.5 : Math.round(rawScope1 * 10) / 10;
-  let scope2 = isDefaultBenchmark ? 51.8 : Math.round(rawScope2 * 10) / 10;
-  let scope3 = isDefaultBenchmark ? 44.1 : Math.round(rawScope3 * 10) / 10;
+  let scope1 = Math.round(rawScope1 * 10) / 10;
+  let scope2 = Math.round(rawScope2 * 10) / 10;
+  let scope3 = Math.round(rawScope3 * 10) / 10;
 
   let totalBeforeActions = Math.round((scope1 + scope2 + scope3) * 10) / 10;
 
@@ -94,11 +87,11 @@ export function calculateFootprint(data, appliedActionIds = []) {
   const finalTotal = Math.max(0, Math.round((totalBeforeActions - totalReducedFromActions) * 10) / 10);
 
   // Compute category values for breakdown
-  const elecVal = isDefaultBenchmark ? 51.4 : scope2;
-  const fuelVal = isDefaultBenchmark ? 11.6 : (Math.round(rawFuelEmissions * 10) / 10 || (scope1 > 0 ? scope1 : 0));
-  const transVal = isDefaultBenchmark ? 34.7 : (Math.round(rawTransportEmissions * 10) / 10);
-  const matVal = isDefaultBenchmark ? 27.0 : (Math.round(rawMaterialEmissions * 10) / 10);
-  const wasteVal = isDefaultBenchmark ? 3.7 : (Math.round(rawWasteEmissions * 10) / 10);
+  const elecVal = scope2;
+  const fuelVal = scope1;
+  const transVal = Math.round(rawTransportEmissions * 10) / 10;
+  const matVal = Math.round(rawMaterialEmissions * 10) / 10;
+  const wasteVal = Math.round(rawWasteEmissions * 10) / 10;
 
   const sumValues = (elecVal + transVal + matVal + fuelVal + wasteVal) || 1;
 
@@ -182,22 +175,33 @@ export function calculateFootprint(data, appliedActionIds = []) {
 /**
  * Calculates What-If dynamic scenario
  */
-export function calculateWhatIfImpact(baseFootprint, category, reductionPct) {
+export function calculateWhatIfImpact(baseFootprint, category, reductionPct, actualAnnualKwh = 144000) {
   const pct = Math.max(0, Math.min(50, reductionPct)) / 100;
-  
-  // Base electricity emissions is 51.4 tCO2e
-  const baseCategoryEmission = category === 'Electricity' ? 51.4 : category === 'Fuel' ? 11.6 : 34.7;
-  const reductionTco2e = Math.round(baseCategoryEmission * pct * 10) / 10;
+  const reductionTco2e = Math.round(baseFootprint * pct * 10) / 10;
   const newTotal = Math.max(0, Math.round((baseFootprint - reductionTco2e) * 10) / 10);
-  const pctReductionOverall = Math.round((reductionTco2e / baseFootprint) * 1000) / 10;
+  const pctReductionOverall = baseFootprint > 0 ? Math.round((reductionTco2e / baseFootprint) * 1000) / 10 : 0;
 
-  // Financial model based on 20% benchmark:
-  // At 20% Electricity reduction:
-  // Investment: ₹65,000 | Annual Saving: ₹38,000 | Payback: 1.7 years
-  const scale = pct / 0.20;
-  const investment = Math.round(65000 * Math.max(0.2, scale));
-  const annualSaving = Math.round(38000 * scale);
-  const paybackYears = annualSaving > 0 ? (investment / annualSaving).toFixed(1) : 0;
+  // Financial model:
+  // For Electricity: saved kWh at avg industrial tariff of ₹8.5/kWh
+  // Solar rooftop installation at ~₹45k per kWp (~1,400 kWh yield per kWp)
+  let annualSaving = 0;
+  let investment = 0;
+
+  if (category === 'Electricity') {
+    const savedKwh = actualAnnualKwh * pct;
+    annualSaving = Math.round(savedKwh * 8.5);
+    const requiredKwp = Math.max(5, savedKwh / 1400);
+    investment = Math.round(requiredKwp * 45000);
+  } else if (category === 'Fuel') {
+    const approxLitres = (reductionTco2e * 1000) / 2.687;
+    annualSaving = Math.round(approxLitres * 92.5);
+    investment = Math.round(annualSaving * 1.8);
+  } else {
+    annualSaving = Math.round((reductionTco2e * 1000 / 0.245) * 1.5);
+    investment = Math.round(annualSaving * 1.5);
+  }
+
+  const paybackYears = annualSaving > 0 ? (investment / annualSaving).toFixed(1) : '0.0';
 
   return {
     newTotal,

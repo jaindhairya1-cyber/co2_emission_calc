@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, ShieldCheck, Zap, ArrowRight, Lock, Mail, Phone, Key, AlertCircle, CheckCircle, Info, ExternalLink } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, ArrowRight, Lock, Mail, Phone, Key, AlertCircle, CheckCircle, Info, ExternalLink, ChevronLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
   signInWithEmail,
@@ -13,7 +13,7 @@ import {
 } from '../services/supabaseClient';
 
 export default function Screen02Auth() {
-  const { navigateTo, tempId, setTempId, setAuthUser, updateBusiness } = useApp();
+  const { navigateTo, goBack, tempId, setTempId, setAuthUser, updateBusiness } = useApp();
   const [isSignUp, setIsSignUp] = useState(false);
   const [authType, setAuthType] = useState('email'); // 'email' | 'phone'
 
@@ -145,13 +145,19 @@ export default function Screen02Auth() {
     }
   };
 
-  const handleUseTempId = () => {
-    // Instant frictionless guest access with Temporary Session ID
-    navigateTo(3);
-  };
-
   return (
     <div className="screen-container auth-screen">
+      <div className="wizard-top-nav">
+        <button
+          type="button"
+          className="wizard-back-btn"
+          onClick={() => (goBack ? goBack() : navigateTo(1))}
+          aria-label="Back to welcome page"
+        >
+          <ChevronLeft size={22} />
+        </button>
+      </div>
+
       <div className="auth-header">
         <div className="auth-logo-badge">
           <img src="/logo.png" alt="TerraAI Logo" className="auth-logo-img" />
@@ -344,26 +350,6 @@ export default function Screen02Auth() {
         </svg>
         <span>Continue with Google</span>
       </button>
-
-      {/* Temporary Guest ID Option */}
-      <div className="temp-id-access-card">
-        <div className="temp-id-info">
-          <div className="temp-chip">
-            <Zap size={14} className="text-emerald" />
-            <span>Temporary MSME Access</span>
-          </div>
-          <div className="temp-id-code">ID: {tempId}</div>
-        </div>
-        <button
-          type="button"
-          id="btn-use-temp-id"
-          className="btn-temp-access"
-          onClick={handleUseTempId}
-        >
-          <span>Use Temporary ID</span>
-          <ArrowRight size={16} />
-        </button>
-      </div>
 
       <div className="auth-footer">
         <p className="auth-footer-text">
